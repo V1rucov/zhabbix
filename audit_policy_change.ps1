@@ -7,12 +7,7 @@ $events = Get-WinEvent -FilterHashtable @{
 } -ErrorAction SilentlyContinue
 
 if ($events) {
-    Write-Host "Audit policy changed:"
-    foreach ($event in $filteredEvents) {
-        Write-Host "TIME: $($event.TimeCreated)"
-        Write-Host "USR: $($event.Properties[1].Value)"
-        Write-Host "----------------------------------"
-    }
+    Write-Host "Audit policy changed: TIME: $($event.TimeCreated), USR: $($event.Properties[1].Value)"
 } 
 else {
     Write-Host "1"
