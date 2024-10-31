@@ -15,5 +15,5 @@ if ($events) {
     }
 } 
 else {
-    Write-Host "No events"
+    Write-Host "1"
 }
