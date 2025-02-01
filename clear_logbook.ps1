@@ -5,5 +5,7 @@ $clear_logbook = Get-WinEvent -FilterHashtable @{
     StartTime = $timeThreshold
 } -ErrorAction SilentlyContinue
 
-if ($clear_logbook.Count -and $clear_logbook.Count -gt 0) { Write-Output 1 } 
-else { Write-Output 0 }
+if ($clear_logbook) { 
+    Write-Output "Security log was cleared on $(hostname) at $($clear_logbook.TimeCreated)"
+} 
+else { Write-Output 0;}

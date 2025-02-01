@@ -8,9 +8,7 @@ $events = Get-WinEvent -FilterHashtable @{
 
 if ($events) {
     foreach ($event in $events) {
-        Write-Host "Audit policy changed: TIME: $($event.TimeCreated), USR: $($event.Properties[1].Value)"
+        Write-Host "Audit policy changed: TIME: $($event.TimeCreated), USR: $($event.Properties[1].Value) on $(hostname)"
     }
-} 
-else {
-    Write-Host "1"
 }
+else {Write-Host "1"}

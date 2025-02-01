@@ -1,9 +1,6 @@
 $defenderStatus = Get-MpPreference
 
 if ($defenderStatus.DisableRealtimeMonitoring -eq $true) {
-    $defenderStatus = 1
-} else {
-    $defenderStatus = 0
+    Write-Output "WinDefender RTM was disabled on $(hostname) at $($clear_logbook.TimeCreated)" 
 }
-
-$defenderStatus
+else {Write-Output 0}

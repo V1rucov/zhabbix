@@ -11,14 +11,13 @@ $filteredEvents = $events | Where-Object {
 }
 
 if ($filteredEvents) {
-    Write-Host "Interactive logon (or RDP):"
+    Write-Host "Interactive logon (or RDP) detected:"
     foreach ($event in $filteredEvents) {
+        Write-Host "----------------------------------"
         Write-Host "TIME: $($event.TimeCreated)"
         Write-Host "USR: $($event.Properties[5].Value)"
         Write-Host "SRC: $($event.Properties[18].Value)"
         Write-Host "----------------------------------"
     }
 } 
-else {
-    Write-Host "No events"
-}
+else {Write-Host "0"}
