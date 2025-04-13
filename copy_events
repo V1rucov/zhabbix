@@ -1,42 +1,27 @@
-param (
-    [string]$WorkHoursStart = "07:00",
-    [string]$WorkHoursEnd = "18:00",
-    [int]$LookbackHours = 2
-)
+$eventID = 4663
+$copyCount = 0
+$timeLimit = (Get-Date).AddMinutes(-5)  # Например, за последние 5 минут
 
 try {
-    $now = Get-Date
-    $startDate = $now.AddHours(-$LookbackHours)
-
-    # Упрощённые временные рамки
-    $startTime = [TimeSpan]::Parse($WorkHoursStart)
-    $endTime = [TimeSpan]::Parse($WorkHoursEnd)
-
-    # Системные аккаунты игнорируются
-    $excludeUsers = "SYSTEM|LOCAL SERVICE|NETWORK SERVICE|ANONYMOUS LOGON"
-
-    # Быстрый фильтр событий входа
-    $events = Get-WinEvent -FilterHashtable @{
-        LogName = 'Security'
-        ID = 4624
-        StartTime = $startDate
-    } -MaxEvents 100 -ErrorAction Stop
+    $events = Get-WinEvent -FilterHashtable @{LogName = 'Security'; Id = $eventID; StartTime = $timeLimit} -ErrorAction Stop
 
     foreach ($event in $events) {
-        $username = $event.Properties[5].Value
-        $time = $event.TimeCreated.TimeOfDay
+        $message = $event.Message
 
-        if ($username -notmatch $excludeUsers) {
-            if ($time -lt $startTime -or $time -gt $endTime) {
-                Write-Output 1
-                exit 0
+        # Проверка: объект — файл, и операция — запись/создание
+        if ($message -match "Object Type:\s+File" -and
+            $message -match "Accesses:\s+(.*)") {
+            
+            $access = $matches[1]
+
+            if ($access -match "WriteData|CreateFile|AppendData") {
+                $copyCount++
             }
         }
     }
+} catch {
+    $copyCount = 0
+}
 
-    Write-Output 0
-}
-catch {
-    Write-Output -1
-    exit 1
-}
+# Выводим только число для Zabbix
+$copyCount
