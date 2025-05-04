@@ -1,0 +1,45 @@
+param (
+    [int]$MinutesAgo = 1  # Период проверки в минутах (по умолчанию 1 минута)
+)
+
+$timeThreshold = (Get-Date).AddMinutes(-$MinutesAgo)
+$result = 0
+$logDetails = @()
+
+# События очистки для разных журналов:
+$logEvents = @(
+    @{LogName="Security"; ID=1102; Description="security"},
+    @{LogName="System"; ID=104; Description="system"},
+    @{LogName="Application"; ID=1102; Description="application"},
+    @{LogName="Setup"; ID=4; Description="setup"},
+    @{LogName="ForwardedEvents"; ID=1102; Description="forwarded"}
+)
+
+foreach ($log in $logEvents) {
+    try {
+        $events = Get-WinEvent -FilterHashtable @{
+            LogName = $log.LogName
+            ID = $log.ID
+            StartTime = $timeThreshold
+        } -ErrorAction SilentlyContinue -MaxEvents 1
+
+        if ($events) {
+            $result = 1
+            $logDetails += "{0}:{1}" -f $log.Description, $events[0].TimeCreated.ToString("yyyy-MM-dd HH:mm:ss")
+        }
+    }
+    catch {
+        # Если журнал не существует или недоступен
+        continue
+    }
+}
+
+# Формат вывода для Zabbix:
+if ($result -eq 1) {
+    # Выводим статус и детали через разделитель |
+    "{0}|{1}" -f $result, ($logDetails -join "|")
+}
+else {
+    # Если событий очистки не обнаружено
+    Write-Output "0"
+}
