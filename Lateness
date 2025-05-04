@@ -25,9 +25,13 @@ try {
     foreach ($event in $events) {
         $username = $event.Properties[5].Value
         $time = $event.TimeCreated.TimeOfDay
+        $dayOfWeek = $event.TimeCreated.DayOfWeek
 
         if ($username -notmatch $excludeUsers) {
-            if ($time -lt $startTime -or $time -gt $endTime) {
+            # Проверяем либо выходные, либо нерабочее время в будни
+            if (($dayOfWeek -eq [DayOfWeek]::Saturday) -or 
+                ($dayOfWeek -eq [DayOfWeek]::Sunday) -or
+                ($time -lt $startTime -or $time -gt $endTime)) {
                 Write-Output 1
                 exit 0
             }
@@ -40,3 +44,4 @@ catch {
     Write-Output -1
     exit 1
 }
+
